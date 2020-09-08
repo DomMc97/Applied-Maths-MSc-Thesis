@@ -12,5 +12,7 @@ constructNetworkStructure edited from here-https://github.com/DomMc97/GraphBased
 Markov Stability Community Detection was ran using code from here-https://github.com/DomMc97/GraphBasedClustering or https://github.com/michaelschaub/PartitionStability.
 This was ran directly in a MATLAB console longrun.m is the result of the run.
 
-# MSOA Data Prep
+Plotting code has been adapted from here-https://github.com/tarikaltuncu/AnalyseMS and here-https://github.com/scipy/scipy-cookbook/blob/master/ipython/SignalSmooth.ipynb.
+
+## MSOA Data Prep
 Files and a notebook relating to the cleaning and merging data relating to MSOAs and trust locations.
