@@ -19,3 +19,6 @@ Files and a notebook relating to the cleaning and merging data relating to MSOAs
 
 ## GAM Classes
 Classes written for the purpose of calculating GAM.
+
+## Geographic Adjacency
+Notebooks visualising and quantifting Geographic Adjacency Graph Construction techniques.
