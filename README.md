@@ -21,4 +21,7 @@ Files and a notebook relating to the cleaning and merging data relating to MSOAs
 Classes written for the purpose of calculating GAM.
 
 ## Geographic Adjacency
-Notebooks visualising and quantifting Geographic Adjacency Graph Construction techniques.
+Google Colab notebooks visualising and quantifting Geographic Adjacency Graph Construction techniques.
+
+## Cluster Visualisations
+Google Colab notebooks visualising and quantifting clusters and GAM for the 5 chosen clusters.
