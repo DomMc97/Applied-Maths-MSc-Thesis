@@ -1,5 +1,5 @@
 # Applied-Maths-MSc-Thesis
-Files created for the purpose of Dominic McEwen's Applied Mathematics Msc Thesis, Imperial College London.
+Files created for the purpose of Dominic McEwen's Applied Mathematics Msc Thesis, Imperial College London. Full thesis available on request.
 
 ## CkNN
 Files relating to the CkNN construction of the MSOA Cosine Similarity Graph. 
