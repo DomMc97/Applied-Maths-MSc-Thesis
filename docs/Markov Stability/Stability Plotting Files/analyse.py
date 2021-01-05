@@ -379,7 +379,64 @@ def varinfo(partition_vectors, ComputeParallel=False):
 
     return vi, vi_mat
 
-# new class added by DM
+# Added by DM using https://github.com/scipy/scipy-cookbook/blob/master/ipython/SignalSmooth.ipynb.
+# This is used to allow the smoothing of the VI signal.
+def smooth(x, window_len=6, window='hanning'):
+    """smooth the data using a window with requested size.
+
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+
+    input:
+        x: the input signal
+        window_len: the dimension of the smoothing window; should be an odd integer
+        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+            flat window will produce a moving average smoothing.
+
+    output:
+        the smoothed signal
+
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+
+    see also:
+
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+    """
+
+    if x.ndim != 1:
+        raise ValueError #smooth only accepts 1 dimension arrays.
+
+    if x.size < window_len:
+        raise ValueError #Input vector needs to be bigger than window size.
+
+
+    if window_len<3:
+        return x
+
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError # Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+
+
+    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+
+    if window == 'flat': #moving average
+        w=np.ones(window_len,'d')
+    else:
+        w=eval('np.'+window+'(window_len)')
+
+    y=np.convolve(w/w.sum(),s,mode='valid')
+
+    return y[int(window_len/2-1):-int(window_len/2)]
+
+# new class added by DM which displays the smoothed VI. 
 class SmoothMSexperiment:
 
     def __init__(self, mat_file, save_dir, **kwargs):
@@ -528,9 +585,6 @@ class SmoothMSexperiment:
         w = int(20 * (h / 9))
 
 
-        """
-        Removed old hover tool.
-        """
         p1 = figure(x_axis_type="log", y_axis_type="log", title="Markov Stability Plot",
                     plot_width=w, plot_height=h,tools=['save'])
 
@@ -548,12 +602,8 @@ class SmoothMSexperiment:
         p1.yaxis.axis_label = 'Variation of Information'
         p1.yaxis.axis_label_text_color = "blue"
 
-        """
-        Added seperate hover tool for VI plot as follows and changed mode to inline.
-        """
-        """
-        now plots smooth signal.
-        """
+        
+        # Plotting of smooth signal.
         smooth_VI = smooth(self.VI)
         loc_min = np.r_[True, smooth_VI[1:] < smooth_VI[:-1]] & np.r_[smooth_VI[:-1] < smooth_VI[1:], True]
 
@@ -570,9 +620,6 @@ class SmoothMSexperiment:
             LogAxis(y_range_name="clusters", axis_label="Number of Clusters", axis_label_text_color='red'), 'right')
         p1.x_range = Range1d(np.amin(self.Time), np.amax(self.Time))
 
-        """
-        Added seperate hover tool for VI plot as follows and changed mode to inline.
-        """
         plot2 = p1.line(self.Time, self.N, color='red', legend_label='Number of Clusters', y_range_name="clusters")
         p1.add_tools(HoverTool(renderers=[plot2],tooltips=[('Markov time: ','@x'),('Number of Clusters: ','@y')],mode='vline'))
 
@@ -584,9 +631,6 @@ class SmoothMSexperiment:
         else:
             p1.legend.visible = False
 
-        """
-        Edited Annotations.
-        """
         for col_ix, mt in enumerate(mt_list):
             span = Span(location=mt, dimension='height', line_color='green', line_dash='dashed',
                             line_width=1.5)
@@ -616,9 +660,6 @@ class SmoothMSexperiment:
 
         self.plot_dir = os.path.join(self.save_dir, f"MS_plot_smooth")
 
-        """
-        Added option for inline display of plot in notebook.
-        """
         if display:
             output_notebook(INLINE)
             show(p)
@@ -630,107 +671,3 @@ class SmoothMSexperiment:
                 column.output_backend = "svg"
         export_svgs(p, filename=f"{self.plot_dir}.svg")
         return plots
-
-
-def varinfo(partition_vectors, ComputeParallel=False):
-    """%VARINFO      Calculates the variation of information matrix and average
-    %             between all pairs of a set of partitions
-    %
-    %   [VI,VI_MAT] = VARINFO(P) calculates the variation of information between
-    %   each pair of partitions contained in P, where P is the N by M matrix
-    %   of partitions where N is the number of nodes in the original graph
-    %   and M is the number of partitions. The output VI is the average variation
-    %   of information between all pairs of partitions, and VI_MAT is the M by M
-    %   matrix where entry (i,j) is the variation of information between
-    %   the partitions contained in column i and j of the matrix P.
-    %
-    %   [VI,VI_MAT] = VARINFO(P,F) allows the calculation of the variation of
-    %   information in parallel if the boolean F is true and provided that
-    %   matlab pool is running.
-    %
-    %   This code has been adapted from the code originally implemented for the
-    %   following paper:
-    %
-    %       The performance of modularity maximization in practical contexts.
-    %       B. H. Good, Y.-A. de Montjoye and A. Clauset.
-    %       Physical Review E 81, 046106 (2010).
-    %
-    %   The original code can be found at:
-    %   http://tuvalu.santafe.edu/~aaronc/modularity/"""
-
-    number_of_partitions, n = partition_vectors.shape
-
-    """% If all the partitions are identical, vi=0 and there is no need to do the
-    % rest of the calculations which are computationally expensive."""
-    a = partition_vectors[:, 0]
-    if np.all(a == partition_vectors[0, :], axis=0):
-        print('all partitions are identical. return 0')
-        vi_mat = np.zeros((number_of_partitions, number_of_partitions))
-        vi = 0
-        return vi, vi_mat
-
-    """% Select only the partitions which are different"""
-    partition_vectors, b, c = np.unique(partition_vectors, return_index=True, return_inverse=True, axis=0)
-
-    number_of_partitions = len(b)
-    vi_mat = np.zeros((number_of_partitions, number_of_partitions))
-    nodes = np.arange(n)
-
-    def varinfo_column(i):
-        nonlocal partition_vectors, nodes  # , n, vi, vi_mat#, vi_tot
-
-        partition_1 = partition_vectors[i, :]
-        A_1 = sparse.coo_matrix(([1] * len(nodes), (partition_1, nodes)))
-        A_1.eliminate_zeros()
-        n_1_all = A_1.sum(axis=1)
-        vi_mat_row = np.append(i, np.zeros(number_of_partitions))  # vi_mat[i,:]
-        for j in range(i):
-            partition_2 = partition_vectors[j, :]
-            A_2 = sparse.coo_matrix(([1] * len(nodes), (nodes, partition_2)))
-            A_2.eliminate_zeros()
-            n_2_all = A_2.sum(axis=0).T
-            n_12_all = A_1 * A_2
-            [rows, cols] = np.nonzero(n_12_all)
-            n_12 = n_12_all[rows, cols].T
-
-            n_1 = n_1_all[rows]
-            n_2 = n_2_all[cols]
-            vi = np.divide(np.power(n_12, 2), np.multiply(n_1, n_2))
-            vi = np.sum(np.multiply(n_12, np.log(vi)))
-            vi = -1 / (n * np.log(n)) * vi
-            vi_mat_row[j + 1] = vi
-
-        return vi_mat_row
-
-    if ComputeParallel:
-        try:
-            cores = (min(8, mp.cpu_count(), number_of_partitions))
-            p = mp.Pool(cores)
-            vi_mat_row_list = p.map(varinfo_column, [i for i in range(number_of_partitions)])
-            p.close()
-        except Exception as e:
-            print(e)
-            p.close()
-            raise
-
-    else:
-        vi_mat_row_list = list()
-        for i in range(number_of_partitions):
-            vi_mat_row_list.append(varinfo_column(i))
-
-    for vi_mat_row in vi_mat_row_list:
-        row = int(vi_mat_row[0])
-        vi_mat[row, :] = vi_mat_row[1:]
-
-    vi_mat_full = np.zeros((number_of_partitions, len(c)))
-
-    for i in range(number_of_partitions):
-        vi_mat_full[i, :] = vi_mat[i, c]
-
-    vi_mat_full = vi_mat_full[c, :]
-
-    vi_mat = vi_mat_full + vi_mat_full.T
-
-    vi = np.mean(squareform(vi_mat))
-
-    return vi, vi_mat
