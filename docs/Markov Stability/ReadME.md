@@ -1,3 +1,6 @@
+## Stability_Plotter.ipynb
+A notebook which uses the files and data below to visualises the results of my final run of MSCD.
+
 ## Stability Plotter Files
 Files containing code used for visualisation of the results of Markov Stability Community Detection (MSCD).
 
