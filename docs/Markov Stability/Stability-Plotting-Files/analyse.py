@@ -19,6 +19,8 @@ in the below article that you may cite:
     pages = {2},
 }
 
+Edited further by Dominic McEwen August 2020 for plots used in MSc thesis.
+
 """
 
 
@@ -33,67 +35,11 @@ import multiprocessing as mp
 from bokeh.plotting import figure, gridplot
 from bokeh.models import HoverTool, Range1d, FuncTickFormatter, Span, LogAxis
 from string import ascii_uppercase
-
-"""
-output_notebook added for in notebook display.
-"""
-from bokeh.io import export_png, export_svgs, save, show, output_notebook
+from bokeh.io import export_png, export_svgs, save, show
+# added by DM  to allow in notebook display of Bokeh figures.
+from bokeh.io import output_notebook
 from bokeh.resources import INLINE
 
-def smooth(x,window_len=6,window='hanning'):
-    """smooth the data using a window with requested size.
-
-    This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal
-    (with the window size) in both ends so that transient parts are minimized
-    in the begining and end part of the output signal.
-
-    input:
-        x: the input signal
-        window_len: the dimension of the smoothing window; should be an odd integer
-        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
-            flat window will produce a moving average smoothing.
-
-    output:
-        the smoothed signal
-
-    example:
-
-    t=linspace(-2,2,0.1)
-    x=sin(t)+randn(len(t))*0.1
-    y=smooth(x)
-
-    see also:
-
-    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
-    scipy.signal.lfilter
-    """
-
-    if x.ndim != 1:
-        raise ValueError #smooth only accepts 1 dimension arrays.
-
-    if x.size < window_len:
-        raise ValueError #Input vector needs to be bigger than window size.
-
-
-    if window_len<3:
-        return x
-
-
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError # Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
-
-
-    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
-
-    if window == 'flat': #moving average
-        w=np.ones(window_len,'d')
-    else:
-        w=eval('np.'+window+'(window_len)')
-
-    y=np.convolve(w/w.sum(),s,mode='valid')
-
-    return y[int(window_len/2-1):-int(window_len/2)]
 
 class MSexperiment:
 
@@ -243,9 +189,7 @@ class MSexperiment:
         w = int(20 * (h / 9))
 
 
-        """
-        Removed old hover tool.
-        """
+        # DM removed old hover tool
         p1 = figure(x_axis_type="log", y_axis_type="log", title="Markov Stability Plot",
                     plot_width=w, plot_height=h,tools=['save'])
 
@@ -263,9 +207,8 @@ class MSexperiment:
         p1.yaxis.axis_label = 'Variation of Information'
         p1.yaxis.axis_label_text_color = "blue"
 
-        """
-        Added seperate hover tool for VI plot as follows and changed mode to inline.
-        """
+ 
+        # DM added seperate inline hover tool for VI plot.
         plot1 = p1.line(self.Time, np.power(10, self.VI), color='blue',legend_label='Variation of Information')
         p1.add_tools(HoverTool(renderers=[plot1],tooltips=[('Markov time: ','@x'),('VI: ','@y')],mode='vline'))
 
@@ -279,9 +222,7 @@ class MSexperiment:
             LogAxis(y_range_name="clusters", axis_label="Number of Clusters", axis_label_text_color='red'), 'right')
         p1.x_range = Range1d(np.amin(self.Time), np.amax(self.Time))
 
-        """
-        Added seperate hover tool for VI plot as follows and changed mode to inline.
-        """
+        # DM added seperate inline hover tool for number of clusters plot.
         plot2 = p1.line(self.Time, self.N, color='red', legend_label='Number of Clusters', y_range_name="clusters")
         p1.add_tools(HoverTool(renderers=[plot2],tooltips=[('Markov time: ','@x'),('Number of Clusters: ','@y')],mode='vline'))
 
@@ -290,9 +231,7 @@ class MSexperiment:
         else:
             p1.legend.visible = False
 
-        """
-        Edited Annotations.
-        """
+        # DM changed the annotation code to improve visual appearance.
         for col_ix, mt in enumerate(mt_list):
             span = Span(location=mt, dimension='height', line_color='green', line_dash='dashed',
                             line_width=1.5)
@@ -322,9 +261,8 @@ class MSexperiment:
 
         self.plot_dir = os.path.join(self.save_dir, f"MS_plot")
 
-        """
-        Added option for inline display of plot in notebook.
-        """
+      
+        # DM added the option for inline display of plot in notebook.
         if display:
             output_notebook(INLINE)
             show(p)
@@ -441,7 +379,7 @@ def varinfo(partition_vectors, ComputeParallel=False):
 
     return vi, vi_mat
 
-
+# new class added by DM
 class SmoothMSexperiment:
 
     def __init__(self, mat_file, save_dir, **kwargs):
