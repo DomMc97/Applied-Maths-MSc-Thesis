@@ -11,4 +11,4 @@ File sourced from ONS containing the shapefile of all MSOA borders in England an
 Each NHS hospital trusts and its location sourced by Dr J. Clarke..
 
 ## PROLIST.csv
-List of all NHS trusts in England. 
+List of all NHS trusts in England sourced by Dr J. Clarke.. 
