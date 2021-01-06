@@ -12,10 +12,10 @@ This was ran directly in a MATLAB console longrun.m is the result of the run.
 Plotting code has been adapted from here-https://github.com/tarikaltuncu/AnalyseMS and here-https://github.com/scipy/scipy-cookbook/blob/master/ipython/SignalSmooth.ipynb.
 
 ## MSOA Data Prep
-Files and a notebook relating to the cleaning and merging data relating to MSOAs and trust locations.
+Files and a notebook relating to the cleaning and merging of data related to MSOAs and trust locations.
 
 ## GAM Classes
-Classes written for the purpose of calculating GAM.
+A set of classes written for the purpose of calculating GAM.
 
 ## Geographic Adjacency
 Google Colab notebooks visualising and quantifting Geographic Adjacency Graph Construction techniques.
@@ -24,5 +24,4 @@ Google Colab notebooks visualising and quantifting Geographic Adjacency Graph Co
 Google Colab notebooks visualising and quantifting clusters and GAM for the 5 chosen clusters.
 
 ## Figures
-All interactive figures used in body of the thesis. 
-
+All interactive figures used in body of the thesis.
