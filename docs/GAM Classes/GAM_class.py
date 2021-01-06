@@ -1,7 +1,8 @@
 """
 A set of functions relating to the Geographic Adjaceny measure.
 Note:Class depends on geopandas and a variety of it's additional dependencies
-which need to be downloaded in specific way #link to github#.
+which need to be downloaded in specific way 
+https://github.com/DomMc97/Applied-Maths-MSc-Thesis/blob/master/docs/GAM%20Classes/Geopandas.ipynb.
 """
 
 import numpy as np
@@ -11,55 +12,62 @@ from scipy import spatial
 
 class GAM():
     def __init__(self, gdf):
-        """gdf:geodataframe with a column/columns of labels (unless using class
-        just for benchmark calculation) and column of shapely geometries
+        """
+        Input:
+            gdf:geodataframe with a column/columns of labels (unless using class
+            just for benchmark calculation) and column of shapely polygon geometries.
+        
+        # NOTE: The class can easily edited to use a columns/columns of coordinate
+        locations.
         """
         self.gdf = gdf
         self.N, self.M = gdf.shape
         self.neighs = None
 
     def get_neighs(self, method = 'poly', param = None):
-        """ Finds the neighbors of a node using the geometry column of gdf
+        """ Finds the neighbors of each node using the geometry column of gdf.
         Inputs:
-              method: How to define the neighborhood.
-              Options -'poly': all polygons which share a border
-                      -'k': k-nearest neighbors based on euclidean distance
-                      between centroids.
+              method: How to determine whether nodes are neighbors.
+              Options -'poly': If the polygon border associated to both the nodes 
+                      touch (i.e they share a border).
+                      -'k': If the a node is one of k-nearest neighbors based on euclidean distance
+                      between centroids of the other node.
                       -'ball': epsilon ball method based on euclidean distance
                       between centroids.
               param: Additional argument for 'k' or 'ball'.
-        Output: gdf a geodataframe with neighbors and number of neighbours
-        column.
+        Output: gdf a geodataframe with a column of neighbors for each node and another column of number of neighbors of that node.
         """
 
-        #finds neighbors for k-nearest method
+        # finds neighbors for k-nearest method
         if method == 'k':
-            #finds centroids
+            # finds centroids
+            # NOTE: To be updated if only coordinate data is available
             centroids = self.gdf['geometry'].apply(
-                lambda g:[g.centroid.x,g.centroid.y]).tolist()
+                lambda g:[g.centroid.x, g.centroid.y]).tolist()
 
-            #spatially organising the points on a tree to reduce runtime
+            # spatially organising the points on a tree to reduce runtime
             kdtree = spatial.KDTree(centroids)
 
-            #calculates the nearest neighbors
+            # calculates the k nearest neighbors of each node
             _ , neighs = kdtree.query(centroids, k=param + 1)
 
             # remove self as neighbor
-            neighs = neighs[:,1:]
+            neighs = neighs[:, 1:]
 
-            # creates attribute of neighbors
+            # creates class attribute of neighbors
             self.neighs = neighs
 
-            # adds number of neighbours column to gdf
+            # adds number of neighbors column to gdf
             self.gdf['numneigh'] = param
 
-        #finds neighbors ball method
+        # finds neighbors ball method
         elif method == 'ball':
-            #finds centroids
+            # finds centroids
+            # NOTE: To be updated if only coordinate data is available
             centroids = self.gdf['geometry'].apply(
                 lambda g:[g.centroid.x,g.centroid.y]).tolist()
 
-            #spatially organising the points on a tree to reduce runtime
+            # spatially organising the points on a tree to reduce runtime
             kdtree = spatial.KDTree(centroids)
 
             #calculates the nearest neighbors
@@ -78,13 +86,15 @@ class GAM():
         #finds neighbors for poly method
         elif method =='poly':
             gdf = self.gdf
+            # initialise self.neighs
             self.neighs = []
-
+            
+            # iterates through nodes(rows) and finds their neighbors
             for i, row in gdf.iterrows():
-
                 # finds neighbors
                 neigh = np.array(gdf[gdf.geometry.intersects(
                     row['geometry'])].index)
+                
                 # removes self intersections
                 neigh = neigh[neigh != i]
 
@@ -97,23 +107,23 @@ class GAM():
         else:
             print('Invalid Method')
 
-        gdf = self.gdf
+        gdf = self.gdf # not needed?
 
-        # get location of geometry
+        # get location of geometry column
         geom = gdf.columns.to_list().index('geometry')
 
         # gets list of columns
         cols = gdf.columns.to_list()
 
         # puts numneigh column to right of geometry
-        cols.insert(geom + 1,cols.pop(cols.index('numneigh')))
-        gdf = gdf.reindex(columns= cols)
+        cols.insert(geom + 1, cols.pop(cols.index('numneigh')))
+        gdf = gdf.reindex(columns=cols)
 
         self.gdf = gdf
 
 
     def no_neighs(self):
-        """Finds neighbors if not computed already"""
+        """Finds neighbors using get_neighs() if not already computed."""
         method = input("What method 'poly', 'ball' or 'k'?\n")
 
         if method == 'ball':
@@ -136,37 +146,43 @@ class GAM():
           df: An adjsuted geodataframe with an additional columns of common
           neighbours and 'gi' = common neighbors/number neighbors
         """
-
-        sumN = self.N
+        # gdf to find GAM for 
         df = self.gdf
+        
+        # number of nodes to be summed 
+        sumN = self.N
 
-        # list of cases where g_i = 0
+        # list of cases where common neighbors = 0
         invalid = []
 
-        # computes neighbors if not done already.
+        # computes neighbors if not done already
         if self.neighs is None:
             self.no_neighs()
-
+        
+        # finds the proportion of common neighbors for each node
         for i in range(sumN):
-            #gets label at index i
+            # gets label at index i
             ilabel = df.at[i,'label']
 
-            #gets neighbors
+            # gets neighbors of node i
             neighbors = self.neighs[i]
 
-            #gets labels of neighbors of i
+            # gets labels of neighbors of i
             nlabels = df[df.index.isin(neighbors)]['label'].tolist()
 
-            #number of neighbours in same cluster
+            # number of neighbors in same cluster
             com_neigh = np.count_nonzero(nlabels == ilabel)
 
-            #number of neighbors
+            # number of neighbors
             num_neigh = df.at[i, 'numneigh']
 
-            #calculates gi and adds info to df or removes invalid data
+            # calculates gi and adds info to df
             if num_neigh == 0:
+                # adds node to list of nodes with no neighbors 
                 invalid.append(df.at[i, 'msoa11nm'])
+                # sets gi = 0
                 gi = 0
+                #
                 sumN -= 1
             else:
                 gi = com_neigh/num_neigh
@@ -176,7 +192,6 @@ class GAM():
 
         score = sum(df["gi"]**2)/sumN
 
-        #print('Nodes with no neighbors',invalid)
         if remove:
           for node in invalid:
               df = df[df['msoa11nm'] != node]
