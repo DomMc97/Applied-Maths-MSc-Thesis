@@ -1,5 +1,6 @@
 """
-A class relating to the loading of Markov Stability data from MATLAB and its merging with geographical data.
+A class relating to the loading of Markov Stability Community Detection data 
+from MATLAB and its merging with a DataFrame of geographical data.
 """
 
 import numpy as np
@@ -9,11 +10,12 @@ from scipy.io import loadmat
 class Stability:
 
     def __init__(self, file_name, remove=True):
-        """ Initialises the Stability class by loading MATLAB file of stability data and
-        assigns attributes.
+        """ Initialises the Stability class by loading a MATLAB file of 
+        Markov Stability Community Detection data and assigns attributes.
         Inputs:
-            file_name:  The name of the MATLAB file to be read.
-            remove: Boolean asking whether the Isles of Scilly clustering data should be removed.
+            file_name: The name of the MATLAB file to be read.
+            remove: Boolean asking whether the Isles of Scilly clustering data 
+            should be removed.
         """
         # loads data
         data = loadmat(file_name)
@@ -32,41 +34,44 @@ class Stability:
         self.S = data['S'][0]
 
     def cluster_df(self, df, locs):
-        """ Takes an existing DataFrame which contains auxillary information on each node,
-        including its underlying Geography, and adds a column\columns containing information
-        regarding which cluster label each node has at a given Markov time/times.  
+        """ Takes an existing DataFrame which contains auxillary information on 
+        each node, including its underlying Geography, and adds a column\columns 
+        containing information regarding which cluster label each node has at a 
+        given Markov time/times.
         Inputs:
               df: Dataframe to add clustering labels too.
-              locs: An array/list of indexes relating to corresponding Markov times in t for which
-              we'd like add cluster information for to the df. Or a string 'all' which means 
-              all labels are added (and hence times in t).
+              locs: An array/list of indexes relating to corresponding Markov 
+              times in t for which we'd like add cluster information for to the 
+              df. Or a string 'all' which means all labels are added (and hence 
+              times in t).
         Outputs:
                 newDf: The new dataframe.
-                
+
                 Returned if only 1 location i is provided.
                 n: Number of communities for cluster i.
                 t: Markov time of cluster i.
         """
         df = df.copy() # not needed?
-        
+
         # if a single int is inputed for locs covert to a list of one element
         if type(locs) == int:
             locs = [locs]
-        
-        # if locs is a string this will be an Inavlid input or all which means all times
+
+        # if locs is a string this will be an Inavlid input or 'all'
         if type(locs) == str:
+            # 'all' Markov times
             if locs == 'all':
                     # converts cluster label matrix to dataframe
                     Cdf = pd.DataFrame(self.C)
                     # sets header as time
-                    Cdf.columns = ['{:e}'.format(t) for t in self.t] 
+                    Cdf.columns = ['{:e}'.format(t) for t in self.t]
                     # adds cluster labels to the existing df
-                    newDf = df.join(Cdf.copy()) 
+                    newDf = df.join(Cdf.copy())
 
                     return newDf
             else:
                 print('Invalid string location.')
-        
+
         # case of a single time (and hence column) being added to df
         elif len(locs) == 1:
             # number of clusters at loc i
@@ -80,7 +85,7 @@ class Stability:
             newDf = df.assign(label = list(c))
 
             return newDf, n ,t
-        
+
         # case of a subset of Markov times being added to df
         # Note this else can replicate the if when loc = [0:N]
         # and elif when loc = [i] apart from the returning of n, t
@@ -89,7 +94,8 @@ class Stability:
             myC = self.C[:, locs]
             # converts cluster label matrix to dataframe
             Cdf = pd.DataFrame(myC)
-            Cdf.columns = ['{:e}'.format(t) for t in self.t[locs]] # sets header as time
+            # sets header as time
+            Cdf.columns = ['{:e}'.format(t) for t in self.t[locs]] 
             newDf = df.join(Cdf.copy())
 
             return newDf
