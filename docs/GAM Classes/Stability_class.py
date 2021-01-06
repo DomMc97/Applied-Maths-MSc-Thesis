@@ -47,35 +47,43 @@ class Stability:
                 n: Number of communities for cluster i.
                 t: Markov time of cluster i.
         """
-        df = df.copy()# not needed?
+        df = df.copy() # not needed?
         
-        # if a single int is inputed for locs covert to a list of one element.
+        # if a single int is inputed for locs covert to a list of one element
         if type(locs) == int:
             locs = [locs]
-
+        
+        # if locs is a string this will be an Inavlid input or all which means all times
         if type(locs) == str:
             if locs == 'all':
                     # converts cluster label matrix to dataframe
                     Cdf = pd.DataFrame(self.C)
-                    Cdf.columns = ['{:e}'.format(t) for t in self.t] # sets header as time
-                    newDf = df.join(Cdf.copy())
+                    # sets header as time
+                    Cdf.columns = ['{:e}'.format(t) for t in self.t] 
+                    # adds cluster labels to the existing df
+                    newDf = df.join(Cdf.copy()) 
 
                     return newDf
             else:
                 print('Invalid string location.')
-
+        
+        # case of a single time (and hence column) being added to df
         elif len(locs) == 1:
+            # number of clusters at loc i
             n = self.k[locs[0]]
+            # time at loc i
             t = self.t[locs[0]]
-
-            # column vector of ith cluster.
+            # column vector of ith clustering.
             c = self.C[:,locs[0]]
 
             # adds a column of cluster label.
             newDf = df.assign(label = list(c))
 
             return newDf, n ,t
-
+        
+        # case of a subset of Markov times being added to df
+        # Note this else can replicate the if when loc = [0:N]
+        # and elif when loc = [i] apart from the returning of n, t
         else:
             # slices C
             myC = self.C[:, locs]
