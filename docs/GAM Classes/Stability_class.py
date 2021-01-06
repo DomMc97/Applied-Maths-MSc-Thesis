@@ -1,49 +1,55 @@
 """
-A set of functions relating to the loading and compililing of Markov Stability
-data from MatLab.
+A class relating to the loading of Markov Stability data from MATLAB and its merging with geographical data.
 """
+
 import numpy as np
 import pandas as pd
 from scipy.io import loadmat
 
 class Stability:
 
-    def __init__(self, file_name,remove=True):
-        """
-        Initialises Stability by loading MatLab file of stability data and
+    def __init__(self, file_name, remove=True):
+        """ Initialises the Stability class by loading MATLAB file of stability data and
         assigns attributes.
+        Inputs:
+            file_name:  The name of the MATLAB file to be read.
+            remove: Boolean asking whether the Isles of Scilly clustering data should be removed.
         """
-
+        # loads data
         data = loadmat(file_name)
         # N x T array of cluster labels.
         self.C = data['C']
         # remove Isles of Scilly from cluster information.
         if remove:
             self.C = np.delete(self.C,6639,0)
-        # Array of number of communities.
+        # Array of the number of communities at each Markov time.
         self.k = data['N'][0]
         # Array of Markov times.
         self.t = data['Time'][0]
-        # Array of Variation of Information.
+        # Array of Variation of Information at each Markov time.
         self.VI = data['VI'][0]
-        # Array of Stability
+        # Array of the Stability score at each Markov time.
         self.S = data['S'][0]
 
-    def cluster_df(self, df, locs, style = 'index'):
-        """ Adds columns to an existing dataframe with information
+    def cluster_df(self, df, locs):
+        """ Takes an existing DataFrame which contains auxillary information on each node,
+        including its underlying Geography, and adds a column\columns containing information
+        regarding which cluster label each node has at a given Markov time/times.  
         Inputs:
               df: Dataframe to add clustering labels too.
-              locs: Array of indexes or times to find cluster information for.
-              Or a string 'all' which means all labels are added.
-              style: Whether 'index' or 'time' array provided.
+              locs: An array/list of indexes relating to corresponding Markov times in t for which
+              we'd like add cluster information for to the df. Or a string 'all' which means 
+              all labels are added (and hence times in t).
         Outputs:
-                newDf:The new dataframe.
-                If only 1 location provided return.
+                newDf: The new dataframe.
+                
+                Returned if only 1 location i is provided.
                 n: Number of communities for cluster i.
                 t: Markov time of cluster i.
         """
-        df = df.copy()
-
+        df = df.copy()# not needed?
+        
+        # if a single int is inputed for locs covert to a list of one element.
         if type(locs) == int:
             locs = [locs]
 
@@ -59,7 +65,6 @@ class Stability:
                 print('Invalid string location.')
 
         elif len(locs) == 1:
-            #if style == 'time':
             n = self.k[locs[0]]
             t = self.t[locs[0]]
 
