@@ -30,12 +30,14 @@ class GAM():
               method: How to determine whether nodes are neighbors.
               Options -'poly': If the polygon border associated to both the nodes 
                       touch (i.e they share a border).
-                      -'k': If the a node is one of k-nearest neighbors based on euclidean distance
-                      between centroids of the other node.
+                      -'k': If the a node is one of k-nearest neighbors based 
+                      on euclidean distance between centroids of the other node.
                       -'ball': epsilon ball method based on euclidean distance
                       between centroids.
               param: Additional argument for 'k' or 'ball'.
-        Output: gdf a geodataframe with a column of neighbors for each node and another column of number of neighbors of that node.
+        Output: 
+            gdf: A geodataframe with a column of neighbors for each node and 
+            another column of number of neighbors of that node.
         """
 
         # finds neighbors for k-nearest method
@@ -206,8 +208,8 @@ class GAM():
         return df, score
 
     def GAM_scores(self):
-        """Calculates the Geographic Adjacency Measure scores for multiple clusterings
-        from a gdf with multiple columns of cluster labels.
+        """Calculates the Geographic Adjacency Measure scores for multiple 
+        clusterings from a gdf with multiple columns of cluster labels.
         Output:
                scores: Array of Geographic Adjacency Measure scores for each 
                column of cluster labels.
