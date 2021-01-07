@@ -182,62 +182,69 @@ class GAM():
                 invalid.append(df.at[i, 'msoa11nm'])
                 # sets gi = 0
                 gi = 0
-                #
+                # node has no neighbors so remove from sum
                 sumN -= 1
             else:
+                # calculate the proportion of common neighbors
                 gi = com_neigh/num_neigh
-
+            
+            # add the value of common neighbors to row
             df.at[i, 'comneigh'] = com_neigh
+            # add the value of gi to row
             df.at[i, 'gi'] = gi
-
+        
+        # calculate GAM score
         score = sum(df["gi"]**2)/sumN
-
+        
+        # removes invalid nodes from df
         if remove:
           for node in invalid:
               df = df[df['msoa11nm'] != node]
-
+        
+        # sets the attribute GAMdf for the class the updated df
         self.GAMdf = df
         return df, score
 
     def GAM_scores(self):
-        """Calculates the Geographic Adjacency Measure for a each column of
-        labels of gdf.
+        """Calculates the Geographic Adjacency Measure scores for multiple clusterings
+        from a gdf with multiple columns of cluster labels.
         Output:
-               scores: Array of Geographic Adjacency Measure score.
+               scores: Array of Geographic Adjacency Measure scores for each 
+               column of cluster labels.
           """
 
         # computes neighbors if not done already.
         if self.neighs is None:
             self.no_neighs()
 
-        df = self.gdf.copy()
+        df = self.gdf.copy() # not needeed?
 
-        # get size
+        # get size of df
         N, M = df.shape
 
         # index of first column of labels
         start = df.columns.to_list().index('numneigh') + 1
 
         # access clusters labels
-        Cdf = df.iloc[:,start:M]
+        Cdf = df.iloc[:, start:M]
 
         # initialises c a list of df which will make a matrix of num commneigh
         c = []
         for i in range(N):
 
-            #gets neighbors
+            # gets neighbors
             neighbors = self.neighs[i]
 
-            #get array of labels of i
+            # get array of labels of i
             ilabels = Cdf.iloc[i, :]
 
             # condenses Cdf to just labels of neighbors of i
             Ndf = Cdf[df.index.isin(neighbors)]
 
             # common neighbors for i
-            c_i = Ndf.eq(ilabels,1).sum()
+            c_i = Ndf.eq(ilabels, 1).sum()
 
-            #add to matrix
+            # add to matrix
             c.append(c_i)
 
         # convert c to a matrix in the form of a dataframe
@@ -251,42 +258,42 @@ class GAM():
         sumN, _ = df.shape
 
         # calculates g a matrix of gi's
-        g = np.array(c)/(np.array(df['numneigh'])[:,None])
+        g = np.array(c)/(np.array(df['numneigh'])[:, None])
 
-        #calculate gam scores by squaring and computing row sums
+        # calculate GAM scores by squaring and computing row sums
         scores = np.sum(g**2,axis = 0)/sumN
 
         return scores
 
-    def Aggregate(self,df = None):
-      """Takes a GAMdf and aggregates it based on cluster.
+    def Aggregate(self, df=None):
+      """Takes a GAMdf(see GAM_df() function) and group by cluster.
         Input: df of self.GAMdf type. Or None if already set.
         Output: Aggregated dataframe
       """
 
-      #assigns df
+      # assigns df
       if df is None:
           df = self.GAMdf
 
       #aggreagates cluster data
       aggdf = df.copy()
-      aggdf = aggdf.drop(['msoa11nm','numneigh','comneigh'],axis=1)
+      aggdf = aggdf.drop(['msoa11nm','numneigh','comneigh'], axis=1)
 
       # calculates gi^2 for GAM
       aggdf['gi'] = aggdf['gi']**2
 
-      #for count on aggregation
+      # for count on aggregation
       aggdf['num_MSOAs'] = 1
 
-      #performs aggregation
+      # performs aggregation
       aggdf = aggdf.dissolve(by='label', aggfunc='sum')
       aggdf.reset_index(level=0, inplace=True)
 
-      #adds cluster GAM column
+      # adds cluster GAM column
       aggdf['GAM'] = aggdf['gi']/aggdf['num_MSOAs']
 
-      #remove gi column
-      aggdf = aggdf.drop(['gi'],axis=1)
+      # remove gi column
+      aggdf = aggdf.drop(['gi'], axis=1)
 
       #renames column
       aggdf.rename(columns={'con_trust':'num_trusts'}, inplace=True)
