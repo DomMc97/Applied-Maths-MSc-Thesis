@@ -3,3 +3,9 @@ A class relating to the loading of Markov Stability Community Detection data fro
 
 ## GAM_class.py
 A class with functions related to the calculation of the Geographic Adjacency Measure.
+
+## Benchmark_class.py
+A child of GAM which contains a set of functions relating to the calculation of benchmarks of Geographic Adjaceny measure.
+
+## Geopandas.ipynb
+A notebook detailing how to install Geopandas in a Google Colab notebook.
