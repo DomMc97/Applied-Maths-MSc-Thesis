@@ -11,15 +11,15 @@ from GAM_class import GAM
 from Stability_class import Stability
 
 class Benchmark(GAM):
-    """Calculates benchmark scores and inherites GAM where gdf is in Benchmark
-    form"""
-
     def __init__(self, df):
+      """ Input:
+            df: a Geodataframe with a column of shapely geometries.""" 
       super().__init__(df)
       self.S = None
 
     def get_constants(self):
-        """Gets the constants S and G for the benchmark of GAM"""
+        """ Gets the constants S and G for the benchmark of GAM."""
+        # number of nodes
         N = self.N
 
         # gets neighbors
@@ -39,11 +39,10 @@ class Benchmark(GAM):
         self.S = np.sum(recip_n)/N
 
         # constant G
-        self.G = np.sum(np.outer(recip_n,recip_n))/N**2
+        self.G = np.sum(np.outer(recip_n, recip_n))/N**2
 
     def get_mu(self, k):
-        """
-        Calculates the expected GAM of a random clustering for k an array of
+        """ Calculates the expected GAM of a random clustering for k an array of
         number of communities.
         """
 
@@ -57,9 +56,8 @@ class Benchmark(GAM):
         self.mu = recip_k_2*((k - 1)*self.S + 1)
 
     def get_sigma(self, k):
-        """
-        Calculates the standard deviation of GAM of a random clustering for k
-        an array of number of communities.
+        """ Calculates the standard deviation of GAM of a random clustering for 
+        k an array of the number of communities.
         """
 
         # gets constants if not already found
@@ -77,14 +75,28 @@ class Benchmark(GAM):
 
         # calculates sigma
         self.sigma = np.sqrt(c_k*GS)
+     
+    # Note: Functions below are all related to testing the validatity of the
+    # benchmark calculations with randomdly sampled clusterings.  
 
-
-    def random_df(self,file_name, locs, style = 'index'):
-        """Creates cluster df See Stability but where the clusters are
-        randomised"""
+    def random_df(self,file_name, locs):
+        """ Creates a cluster_df (see Stability) but where the clusters are 
+        drawn uniformly at random and are of the same number of communities of 
+        their correspondong Markov Time.
+            Input:
+                file_name: The name of the MATLAB file to be read.
+                locs: An array/list of indexes relating to corresponding 
+                      Markov times in t for which we'd like add cluster 
+                      information for to the df. Or a string 'all' which means 
+                      all labels are added (and hence times in t).
+              Output:
+                    ran_df: A df with columns of randomly sampled clusterings 
+                    of size matching k
+        """
 
         df = self.gdf.copy()
-
+        
+        # loads results of Markov Stability Community Detection
         stability = Stability(file_name)
 
         # get stability C and k
@@ -102,14 +114,15 @@ class Benchmark(GAM):
         stability.C = ran_C
 
         # creates df from random cluster data
-        ran_df = stability.cluster_df(df, locs, style)
+        ran_df = stability.cluster_df(df, locs)
 
         # bug fix?
         stability.C = stab_C
 
         return ran_df
-
-    def sample(self,file_name, loc):
+     
+    # No longer needed can be replicated with random_df() with locs = [loc]
+    def sample(self, file_name, loc):
         """ Gets  a sample random cluster for time at idx loc"""
         df = self.gdf.copy()
 
@@ -120,15 +133,22 @@ class Benchmark(GAM):
         # column vector of ith cluster.
         c = np.random.randint(0, k, self.N)
 
-        # adds a column of cluster label.
+        # adds a column of cluster labels.
         newDf = df.assign(label = list(c))
 
         return newDf
 
 
-    def samples(self,file_name, style = 'index'):
-        """ Gets sample GAM scores for unique values of k and returns samples
-        and unique k"""
+    def samples(self, file_name):
+        """ Gets sample GAM scores for unique values of k found by MSCD.
+            Input:
+                file_name: The name of the MATLAB file to be read.
+            Outputs:
+                unique_k: A list of the unique values of k, the number 
+                of communities found by MSCD.
+                samples: A list of sample GAM scores for randoming clusters
+                for each unique k.
+            """
 
         stability = Stability(file_name)
 
@@ -139,7 +159,7 @@ class Benchmark(GAM):
         unique_k, locs = np.unique(stab_k, return_index=True)
 
         # gets stability dataframe
-        ran_df = self.random_df(file_name, locs, style = 'index')
+        ran_df = self.random_df(file_name, locs)
 
         # gets sample scores
         self.gdf = ran_df
