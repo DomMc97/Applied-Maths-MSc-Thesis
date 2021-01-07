@@ -24,4 +24,4 @@ Google Colab notebooks visualising and quantifting Geographic Adjacency Graph Co
 Google Colab notebooks visualising and quantifting clusters and GAM for the 5 chosen clusters.
 
 ## Figures
-All interactive figures used in body of the thesis.
+All interactive figures used in body of the thesis. They can be found in the uploaded notebooks they are uploaded here for the purpose of hosting on github pages.
