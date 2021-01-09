@@ -21,7 +21,7 @@ A set of classes written for the purpose of calculating GAM.
 Google Colab notebooks visualising and quantifting Geographic Adjacency Graph Construction techniques.
 
 ## Cluster Visualisations
-Google Colab notebooks visualising and quantifting clusters and GAM for the 5 chosen clusters.
+Google Colab notebooks visualising and investigating the 5 chosen clusters including their GAM scores.
 
 ## Figures
 All interactive figures used in body of the thesis. They can be found in the uploaded notebooks they are uploaded here for the purpose of hosting on github pages.
