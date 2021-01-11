@@ -2,7 +2,7 @@
 The boundaries of Englands Ceremonial Counties a ground truth clustering comparison.
 
 ## Cluster_Visualisation_D.ipynb
-The notebook containg the investigation into cluster C.
+The notebook containg the investigation into cluster D.
 
 ## GAM_score
 The GAM score for the cluster D.
