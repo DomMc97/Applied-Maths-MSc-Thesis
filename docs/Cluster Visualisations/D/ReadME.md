@@ -1,8 +1,8 @@
+## Ceremonial_counties
+The boundaries of Englands Ceremonial Counties a ground truth clustering comparison.
+
 ## Cluster_Visualisation_D.ipynb
 The notebook containg the investigation into cluster C.
-
-## Counties__December_2016__Boundaries
-The boundaries of Englands Ceremonial Counties a ground truth clustering comparison (Used NHS Area Teams in paper).
 
 ## GAM_score
 The GAM score for the cluster D.
