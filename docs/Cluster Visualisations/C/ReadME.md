@@ -2,7 +2,7 @@
 The notebook containg the investigation into cluster C.
 
 ## Counties__December_2016__Boundaries
-The boundaries of Englands counties as of December 2016 a ground truth clustering comparison (Used NHS Area Teams in paper).
+The boundaries of Englands Counties as of December 2016 a ground truth clustering comparison (Used NHS Area Teams in paper).
 
 ## GAM_score
 The GAM score for the cluster A.
