@@ -5,7 +5,7 @@ The notebook containg the investigation into cluster C.
 The boundaries of Englands Counties as of December 2016 a ground truth clustering comparison (Used NHS Area Teams in paper).
 
 ## GAM_score
-The GAM score for the cluster A.
+The GAM score for the cluster C.
 
 ## MSOA_ran_df
 A Geodataframe containing information of a random clustering of the same number of communities of C at an MSOA resolution.
