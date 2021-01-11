@@ -2,7 +2,7 @@
 The notebook containg the investigation into cluster B.
 
 ## GAM_score
-The GAM score for the cluster A.
+The GAM score for the cluster B.
 
 ## MSOA_ran_df
 A Geodataframe containing information of a random clustering of the same number of communities of B at an MSOA resolution.
