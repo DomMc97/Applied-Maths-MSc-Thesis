@@ -12,7 +12,7 @@ This was ran directly in a MATLAB console longrun.m is the result of the run.
 Plotting code has been adapted from here-https://github.com/tarikaltuncu/AnalyseMS and here-https://github.com/scipy/scipy-cookbook/blob/master/ipython/SignalSmooth.ipynb.
 
 ## MSOA Data Prep
-Files and a notebook relating to the cleaning and merging of data related to MSOAs and trust locations.
+Files and a notebook relating to the cleaning and merging of data related to MSOAs and hospital trust locations.
 
 ## GAM Classes
 A set of classes written for the purpose of calculating GAM.
