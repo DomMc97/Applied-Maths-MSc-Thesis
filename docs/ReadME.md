@@ -6,6 +6,8 @@ MSOA Distance File available on request.
 constructNetworkStructure edited from here-https://github.com/DomMc97/GraphBasedClustering.
 
 ## Markov Stability
+All code related to the plotting of Markov Stability Community Detection results.
+
 Markov Stability Community Detection was ran using code from here-https://github.com/DomMc97/GraphBasedClustering or https://github.com/michaelschaub/PartitionStability.
 This was ran directly in a MATLAB console longrun.m is the result of the run.
 
